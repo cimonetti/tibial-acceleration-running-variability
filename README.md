@@ -6,8 +6,8 @@ Analysis pipeline for a small experimental study on how running experience and t
 
 **Design.** 10 recreational runners (5 experienced, 5 inexperienced) ran on a treadmill at three speeds: preferred (PREF), −10% and +10% of preferred. Each participant wore a triaxial IMU (WitMotion WT901BLE, ~200 Hz) on each tibia.
 
-![100 consecutive strides, impact-aligned](figures/cycles_marker_impact.png)
-*100 consecutive strides (grey) and their mean (blue): longitudinal tibial acceleration, left leg, preferred speed, participant P01. Here 0% is the impact peak.*
+![100 consecutive strides aligned to the longitudinal acceleration peak](figures/cycles_marker_impact.png)
+*100 consecutive strides (grey) and their mean (blue): longitudinal tibial acceleration, left leg, preferred speed, participant P01. Here 0% is the longitudinal acceleration peak used by the exploratory segmentation heuristic.*
 
 ## What the pipeline does
 
@@ -43,19 +43,19 @@ These are bilateral means, segmented on the original anteroposterior-peak event.
 
 ## Limitations
 
-**1. The segmentation event inflates the variability measures.** The pipeline starts each cycle at the peak of anteroposterior acceleration. That peak occurs around toe-off (~270 ms after impact, ~500 ms before the next one), and its latency to impact jitters by 7–12 ms (SD) from stride to stride. The jitter adds to the measured variability. Re-segmenting the same data on the impact peak, which is a proxy for initial contact and the conventional start of the gait cycle, gives these results for P01 (bilateral means):
+**1. Variability depends on the segmentation event.** The pipeline starts each cycle at the peak of anteroposterior acceleration. An exploratory alternative selects the maximum longitudinal acceleration within 45–80% of each AP-defined cycle. For P01, the interval between these two markers varies by approximately 7–12 ms (SD) across strides. Their correspondence to toe-off and initial contact has not been validated against a reference method. Re-segmenting P01's data using the longitudinal acceleration peak gives these results (bilateral means):
 
 | Measure | Event | −10% | PREF | +10% |
 |---|---|---|---|---|
 | Waveform variability (%) | AP peak (original) | 6.3 | 5.3 | 6.3 |
-| | Impact peak | 3.2 | 3.3 | 3.2 |
+| | Longitudinal peak (exploratory) | 3.2 | 3.3 | 3.2 |
 | Stride-time CV (%) | AP peak (original) | 1.61 | 1.37 | 1.59 |
-| | Impact peak | 1.03 | 1.03 | 0.90 |
+| | Longitudinal peak (exploratory) | 1.03 | 1.03 | 0.90 |
 
-Variability drops by roughly half, and for this participant the apparent minimum at preferred speed disappears. A future version should segment on initial contact, either from the impact peak in a lightly filtered signal or from the shank gyroscope, and keep the AP peak only as a sensitivity analysis. The impact detection in `sensibilidade_marco_impacto.py` is a simple heuristic and has not been validated.
+For P01, the longitudinal-peak segmentation yields lower variability, and the apparent minimum at preferred speed is no longer evident. This comparison shows sensitivity to the segmentation method; lower variability alone does not establish which marker is more accurate. Both markers require validation against a reference method before they can be interpreted as specific gait events. The detector in `sensibilidade_marco_impacto.py` is an unvalidated heuristic.
 
-![Same strides, segmented on the AP peak](figures/cycles_marker_ap_peak.png)
-*The same strides segmented on the original event. 0% is the anteroposterior peak near toe-off, so impact appears at ~60–65% and the cycles spread out around it.*
+![Strides segmented on the AP peak](figures/cycles_marker_ap_peak.png)
+*100 central strides segmented on the original event. Here 0% is the anteroposterior acceleration peak, and the longitudinal acceleration peak appears at approximately 60–65% of the cycle.*
 
 **2. α-DFA on 128 strides is biased with the default scales.** With scales 4–64 and quadratic detrending, white noise (true α = 0.50) returns α ≈ 0.62. With scales 8–32 it returns ≈ 0.55, and with linear detrending ≈ 0.51 (2,000 simulations; see `analise_complementar.py`). The α-DFA values should be treated as exploratory.
 
@@ -94,7 +94,7 @@ Participants are identified by codes. Only the author's own recordings (P01) are
 
 ## Notes
 
-The code was written with AI assistance. All analytical decisions, results and limitations were reviewed by the author.
+The code was developed with AI assistance.
 
 ## Author
 
